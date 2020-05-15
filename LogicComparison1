@@ -1,0 +1,81 @@
+using System;
+using System.Threading.Tasks;
+
+namespace OneOrdinaryDifferentialEquation
+{
+    class MainClass
+    {
+        public static void Main(string[] args)
+        {
+            _ = new EquationClass();
+        }
+    }
+    public class Variables
+    {
+        static int index = 2;
+        public double cos;
+        public double sin;
+        public double[] fx0 = new double[index];
+        public double[] fx1 = new double[index];
+        public double fx2;
+        public double[] da = new double[index];
+        public double[] correct = new double[index];
+        public double[] x=new double[index];
+        public double dabase = 1.0e-8;
+        public int[] counter = new int[2];
+    }
+    public class EquationClass:Variables
+    {
+        public EquationClass()
+        {
+            Console.WriteLine("Comparison of [f'(x)=(f(x+da*cos)-f(x))/(da*cos)=f(x) f(0)=1.0] and [f'(x)=(f(x+da)-f(x))/da=f(x) f(0)=1.0] \n\n");
+            Equation();
+        }
+        public void Equation()
+        {
+
+            Task[] tasks = new Task[2];
+            tasks[0] = Task.Run(() => { Equation1_1(); });
+            tasks[1] = Task.Run(() => { Equation1_2(); });
+            Task.WaitAll(tasks);
+        }
+        public void Equation1_1()
+        {
+            da[0] = dabase;
+            fx0[0] = 1.0;
+            for (x[0] = 0.0; x[0] < 1.0;)
+            {
+                cos = Math.Sqrt(1.0 / (1.0 + fx0[0] * fx0[0]));
+                sin = fx0[0] * Math.Sqrt(1.0 / (1.0 + fx0[0] * fx0[0]));
+                fx1[0] = fx0[0] * (1.0 + da[0] * cos);
+                fx2 = fx0[0] + da[0] * sin;
+                x[0] += da[0] * cos;
+                correct[0] = Math.Exp(x[0]);
+                fx0[0] = fx1[0];
+                /*if (counter[0] % 1000000 == 0)
+                {
+                    Console.WriteLine("f'(x)=(f(x+da*cos)-f(x))/(da*cos)=f(x) f(0)=1.0\n x:{0} f1(x):{1} f2(x):{2} correct answer:{3}\n\n", x[0], fx1[0], fx2[0], correct[0]);
+                }
+                counter[0]++;*/
+            }
+            Console.WriteLine("f'(x)=(f(x+da*cos)-f(x))/(da*cos)=f(x) f(0)=1.0\n x:{0} f1(x):{1} f2(x):{2} correct answer:{3}\n\n", x[0], fx1[0], fx2, correct[0]);
+        }
+        public void Equation1_2()
+        {
+            da[1] = dabase;
+            fx0[1] = 1.0;
+            for (x[1] = 0.0; x[1]< 1.0;x[1]+=da[1])
+            {
+                fx1[1] = fx0[1] * (1.0 + da[1]);
+                correct[1] = Math.Exp(x[1]);
+                fx0[1] = fx1[1];
+                /*if (counter[1] % 1000000 == 0)
+                {
+                    Console.WriteLine("f'(x)=(f(x+da)-f(x))/da=f(x) f(0)=1.0\n x:{0} f(x):{1} correct answer:{2}\n\n", x[1], fx0[1], correct[1]);
+                }
+                counter[1]++;*/
+            }
+            Console.WriteLine("f'(x)=(f(x+da)-f(x))/da=f(x) f(0)=1.0\n x:{0} f(x):{1} correct answer:{2}\n\n", x[1], fx0[1], correct[1]);
+        }
+    }
+}
